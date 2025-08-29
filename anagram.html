@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anagram Challenge Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: linear-gradient(135deg, #ffeef8 0%, #f8d7da 50%, #fce4ec 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: linear-gradient(145deg, #ffffff 0%, #fdf2f8 100%);
+            border-radius: 25px;
+            box-shadow: 0 25px 50px rgba(236, 72, 153, 0.15);
+            border: 3px solid #f9a8d4;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        h1 {
+            color: #be185d;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(236, 72, 153, 0.2);
+        }
+
+        h2 {
+            color: #be185d;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #f9a8d4;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background: #fdf2f8;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #ec4899;
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.2);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px;
+            box-shadow: 0 8px 15px rgba(236, 72, 153, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 25px rgba(236, 72, 153, 0.4);
+            background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .anagram-display {
+            background: linear-gradient(145deg, #fdf2f8 0%, #fce7f3 100%);
+            border: 3px solid #f472b6;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 25px 0;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #be185d;
+            letter-spacing: 3px;
+            box-shadow: 0 10px 20px rgba(244, 114, 182, 0.2);
+        }
+
+        .japanese-meaning {
+            background: linear-gradient(145deg, #fef7ff 0%, #fae8ff 100%);
+            border-left: 4px solid #d946ef;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 15px;
+            font-style: italic;
+            color: #a21caf;
+            box-shadow: 0 5px 15px rgba(217, 70, 239, 0.1);
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 25px 0;
+            padding: 20px;
+            background: linear-gradient(145deg, #fdf2f8 0%, #fce7f3 100%);
+            border-radius: 20px;
+            border: 2px solid #f9a8d4;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ec4899;
+        }
+
+        .stat-label {
+            color: #be185d;
+            font-size: 0.9rem;
+        }
+
+        .feedback {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+
+        .feedback.correct {
+            background: linear-gradient(145deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #166534;
+            border: 2px solid #22c55e;
+        }
+
+        .feedback.incorrect {
+            background: linear-gradient(145deg, #fef2f2 0%, #fecaca 100%);
+            color: #991b1b;
+            border: 2px solid #ef4444;
+        }
+
+        .leaderboard {
+            text-align: left;
+            margin: 25px 0;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: linear-gradient(145deg, #fdf2f8 0%, #fce7f3 100%);
+            border-radius: 15px;
+            border-left: 4px solid #f472b6;
+            box-shadow: 0 3px 10px rgba(244, 114, 182, 0.1);
+        }
+
+        .rank {
+            font-weight: bold;
+            color: #ec4899;
+            margin-right: 15px;
+        }
+
+        .player-name {
+            flex-grow: 1;
+            font-weight: 600;
+            color: #be185d;
+        }
+
+        .player-score {
+            font-weight: bold;
+            color: #d946ef;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .anagram-display {
+                font-size: 1.5rem;
+                padding: 20px;
+            }
+            
+            .game-stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="screen active">
+            <h1>✨💖 Anagram Challenge 💖✨</h1>
+            <p style="margin-bottom: 30px; color: #be185d; font-size: 1.1rem;">
+                Unscramble the letters to find the correct English word! 🌸
+            </p>
+            <div class="input-group">
+                <label for="player-name">Enter Your Name:</label>
+                <input type="text" id="player-name" placeholder="Your name here..." maxlength="20">
+            </div>
+            <button class="btn" onclick="startGame()">Start Game</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <div class="game-stats">
+                <div class="stat">
+                    <div class="stat-value" id="current-score">0</div>
+                    <div class="stat-label">Score</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="question-number">1</div>
+                    <div class="stat-label">Question</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="questions-left">10</div>
+                    <div class="stat-label">Remaining</div>
+                </div>
+            </div>
+
+            <h2>Unscramble this word:</h2>
+            <div class="anagram-display" id="anagram-display">LOADING...</div>
+            
+            <div class="japanese-meaning" id="japanese-meaning">
+                Japanese meaning will appear here
+            </div>
+
+            <div class="input-group">
+                <label for="answer-input">Your Answer:</label>
+                <input type="text" id="answer-input" placeholder="Type your answer here..." onkeypress="handleKeyPress(event)">
+            </div>
+
+            <button class="btn" onclick="submitAnswer()">Submit Answer</button>
+            <button class="btn" onclick="skipQuestion()" style="background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%); opacity: 0.7;">Skip Question</button>
+
+            <div id="feedback" class="feedback" style="display: none;"></div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="screen">
+            <h1>🎉✨ Game Complete! ✨🎉</h1>
+            <div style="margin: 30px 0;">
+                <h2 id="final-score">Your Score: 0/10</h2>
+                <p id="player-result" style="color: #4a5568; font-size: 1.1rem; margin: 15px 0;"></p>
+            </div>
+
+            <div class="leaderboard">
+                <h3 style="color: #2d3748; margin-bottom: 20px;">🏆 Leaderboard</h3>
+                <div id="leaderboard-list"></div>
+            </div>
+
+            <button class="btn" onclick="playAgain()">Play Again</button>
+            <button class="btn" onclick="resetGame()" style="background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%); opacity: 0.8;">New Player</button>
+        </div>
+    </div>
+
+    <script>
+        // Sample word list - you can expand this with your Excel data
+        const wordList = [
+            { word: "LISTEN", anagram: "SILENT", japanese: "聞く (kiku) - to listen" },
+            { word: "EARTH", anagram: "HEART", japanese: "地球 (chikyuu) - earth" },
+            { word: "ANGEL", anagram: "GLEAN", japanese: "天使 (tenshi) - angel" },
+            { word: "STUDY", anagram: "DUSTY", japanese: "勉強 (benkyou) - study" },
+            { word: "FRIEND", anagram: "FINDER", japanese: "友達 (tomodachi) - friend" },
+            { word: "MASTER", anagram: "STREAM", japanese: "主人 (shujin) - master" },
+            { word: "GARDEN", anagram: "DANGER", japanese: "庭 (niwa) - garden" },
+            { word: "TEACHER", anagram: "CHEATER", japanese: "先生 (sensei) - teacher" },
+            { word: "SCHOOL", anagram: "CHOOSE", japanese: "学校 (gakkou) - school" },
+            { word: "NATURE", anagram: "UNRATE", japanese: "自然 (shizen) - nature" },
+            { word: "FAMILY", anagram: "MAINLY", japanese: "家族 (kazoku) - family" },
+            { word: "TRAVEL", anagram: "VARLET", japanese: "旅行 (ryokou) - travel" },
+            { word: "WINTER", anagram: "TWINER", japanese: "冬 (fuyu) - winter" },
+            { word: "SPRING", anagram: "PRINGS", japanese: "春 (haru) - spring" },
+            { word: "SUMMER", anagram: "MUMMER", japanese: "夏 (natsu) - summer" }
+        ];
+
+        let currentPlayer = '';
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let gameQuestions = [];
+        let leaderboard = JSON.parse(localStorage.getItem('anagramLeaderboard')) || [];
+
+        function startGame() {
+            const playerName = document.getElementById('player-name').value.trim();
+            if (!playerName) {
+                alert('Please enter your name to start the game!');
+                return;
+            }
+
+            currentPlayer = playerName;
+            currentQuestionIndex = 0;
+            score = 0;
+            
+            // Shuffle and select 10 questions
+            gameQuestions = [...wordList].sort(() => Math.random() - 0.5).slice(0, 10);
+            
+            showScreen('game-screen');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= gameQuestions.length) {
+                endGame();
+                return;
+            }
+
+            const question = gameQuestions[currentQuestionIndex];
+            document.getElementById('anagram-display').textContent = question.anagram;
+            document.getElementById('japanese-meaning').textContent = question.japanese;
+            document.getElementById('question-number').textContent = currentQuestionIndex + 1;
+            document.getElementById('questions-left').textContent = gameQuestions.length - currentQuestionIndex;
+            document.getElementById('current-score').textContent = score;
+            document.getElementById('answer-input').value = '';
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('answer-input').focus();
+        }
+
+        function submitAnswer() {
+            const userAnswer = document.getElementById('answer-input').value.trim().toLowerCase();
+            const correctAnswer = gameQuestions[currentQuestionIndex].word.toLowerCase();
+            const feedback = document.getElementById('feedback');
+
+            if (!userAnswer) {
+                alert('Please enter an answer!');
+                return;
+            }
+
+            if (userAnswer === correctAnswer) {
+                score++;
+                feedback.textContent = `Correct! The answer is "${gameQuestions[currentQuestionIndex].word}"`;
+                feedback.className = 'feedback correct';
+            } else {
+                feedback.textContent = `Incorrect. The correct answer is "${gameQuestions[currentQuestionIndex].word}"`;
+                feedback.className = 'feedback incorrect';
+            }
+
+            feedback.style.display = 'block';
+            document.getElementById('current-score').textContent = score;
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                loadQuestion();
+            }, 2000);
+        }
+
+        function skipQuestion() {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = `Skipped. The answer was "${gameQuestions[currentQuestionIndex].word}"`;
+            feedback.className = 'feedback incorrect';
+            feedback.style.display = 'block';
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                loadQuestion();
+            }, 2000);
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                submitAnswer();
+            }
+        }
+
+        function endGame() {
+            // Add to leaderboard
+            const playerResult = {
+                name: currentPlayer,
+                score: score,
+                total: gameQuestions.length,
+                date: new Date().toLocaleDateString()
+            };
+
+            leaderboard.push(playerResult);
+            leaderboard.sort((a, b) => b.score - a.score);
+            leaderboard = leaderboard.slice(0, 10); // Keep top 10
+            localStorage.setItem('anagramLeaderboard', JSON.stringify(leaderboard));
+
+            // Show results
+            document.getElementById('final-score').textContent = `Your Score: ${score}/${gameQuestions.length}`;
+            
+            let resultMessage = '';
+            const percentage = (score / gameQuestions.length) * 100;
+            if (percentage >= 90) resultMessage = 'Excellent work! 🌟';
+            else if (percentage >= 70) resultMessage = 'Great job! 👏';
+            else if (percentage >= 50) resultMessage = 'Good effort! 👍';
+            else resultMessage = 'Keep practicing! 💪';
+
+            document.getElementById('player-result').textContent = `${currentPlayer}, ${resultMessage}`;
+
+            updateLeaderboard();
+            showScreen('results-screen');
+        }
+
+        function updateLeaderboard() {
+            const leaderboardList = document.getElementById('leaderboard-list');
+            leaderboardList.innerHTML = '';
+
+            leaderboard.forEach((player, index) => {
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+                item.innerHTML = `
+                    <span class="rank">#${index + 1}</span>
+                    <span class="player-name">${player.name}</span>
+                    <span class="player-score">${player.score}/${player.total}</span>
+                `;
+                leaderboardList.appendChild(item);
+            });
+
+            if (leaderboard.length === 0) {
+                leaderboardList.innerHTML = '<p style="text-align: center; color: #718096;">No scores yet. Be the first to play!</p>';
+            }
+        }
+
+        function playAgain() {
+            currentQuestionIndex = 0;
+            score = 0;
+            gameQuestions = [...wordList].sort(() => Math.random() - 0.5).slice(0, 10);
+            showScreen('game-screen');
+            loadQuestion();
+        }
+
+        function resetGame() {
+            document.getElementById('player-name').value = '';
+            showScreen('welcome-screen');
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // Initialize leaderboard on page load
+        window.onload = function() {
+            updateLeaderboard();
+        };
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9769beef36bdfc9c',t:'MTc1NjQ0NjM2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
